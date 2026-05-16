@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNI USSD Prototype</title>
+<style>
+  body { background: #000; color: #0f0; font-family: monospace; padding: 15px; font-size: 16px; }
+  input, button { background: #111; color: #0f0; border: 1px solid #0f0; padding: 8px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+  #screen { white-space: pre-wrap; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="screen">=== JKUAT RESULTS USSD ===
+Dial *123*123# to start
+
+1. Check Results
+2. Check Fee Balance
+3. Help
+4. Exit
+Enter choice:</div>
+<input type="text" id="input" placeholder="Type here">
+<button onclick="handleInput()">Send</button>
+
+<script>
+const fakeDB = {
+  "COM12345": {
+    results: {"Math 101": "A", "Physics 102": "B+"},
+    fee: "Ksh 15,000 due"
+  },
+  "COM12346": {
+    results: {"Math 101": "C", "Physics 102": "A-"},
+    fee: "Ksh 0 - Paid"
+  }
+};
+
+let step = 0;
+let currentAdm = "";
+
+function showMenu() {
+  document.getElementById("screen").innerText += "\n\n1. Check Results\n2. Check Fee Balance\n3. Help\n4. Exit\nEnter choice:";
+  step = 0;
+}
+
+function handleInput() {
+  let val = document.getElementById("input").value.trim();
+  let screen = document.getElementById("screen");
+
+  if (step === 0) {
+    screen.innerText += "\n" + val;
+    if (val === "1") {
+      screen.innerText += "\nEnter Admission No:";
+      step = 1; // expecting adm no for results
+    } else if (val === "2") {
+      screen.innerText += "\nEnter Admission No:";
+      step = 2; // expecting adm no for fee
+    } else if (val === "3") {
+      screen.innerText += "\n--- HELP ---\nDial this code anytime to check results and fees.\nNo internet needed.\nFor issues, visit ICT Office.\n---------------";
+      showMenu();
+    } else if (val === "4") {
+      screen.innerText += "\nThank you. Goodbye!";
+      step = -1;
+    } else {
+      screen.innerText += "\nInvalid choice. Try again.";
+      showMenu();
+    }
+  } else if (step === 1) {
+    currentAdm = val.toUpperCase();
+    screen.innerText += "\n" + val;
+    if (fakeDB[currentAdm]) {
+      screen.innerText += "\n\n--- RESULTS ---";
+      for (let subj in fakeDB[currentAdm].results) {
+        screen.innerText += "\n" + subj + ": " + fakeDB[currentAdm].results[subj];
+      }
+      screen.innerText += "\n----------------";
+    } else {
+      screen.innerText += "\nStudent not found.";
+    }
+    showMenu();
+  } else if (step === 2) {
+    currentAdm = val.toUpperCase();
+    screen.innerText += "\n" + val;
+    if (fakeDB[currentAdm]) {
+      screen.innerText += "\n\nFee Status: " + fakeDB[currentAdm].fee;
+    } else {
+      screen.innerText += "\nStudent not found.";
+    }
+    showMenu();
+  }
+
+  document.getElementById("input").value = "";
+}
+</script>
+</body>
+</html>
